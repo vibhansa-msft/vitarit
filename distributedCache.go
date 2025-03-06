@@ -115,6 +115,8 @@ func createURLForSet(cnode *cacheNode, key string, copy int) string {
 	return fmt.Sprintf("https://%s:%s?id=%s&copy=%d", cnode.IP, cnode.Port, cnode.ID, copy)
 }
 
+// -----------------------------------------------------------------------
+
 // Get retrieves the value of a key from the distributed cache
 func (cache *distributedCache) get(key string) ([]byte, bool) {
 	nodes := cache.hashRing.getNodes(key, cache.redundancy)
@@ -156,6 +158,8 @@ func (cache *distributedCache) getFromNode(cnode *cacheNode, key string) ([]byte
 	return value, nil
 }
 
+// -----------------------------------------------------------------------
+
 // set sets the value of a key in the distributed cache
 func (cache *distributedCache) set(key string, value []byte) error {
 
@@ -189,6 +193,8 @@ func (cache *distributedCache) setToNode(cnode *cacheNode, copy int, key string,
 
 	return nil
 }
+
+// -----------------------------------------------------------------------
 
 // remvoe deletes the entry fromt he hashring
 func (cache *distributedCache) remove(key string) bool {

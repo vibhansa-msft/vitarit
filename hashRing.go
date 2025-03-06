@@ -145,7 +145,7 @@ func (ring *hashRing) getNodes(key string, redundancy int) []*cacheNode {
 	masterIdx := idx
 	nodes = append(nodes, ring.nodeMap[ring.sortedHashes[idx]])
 
-	for redundancy > 1 {
+	for redundancy > 0 {
 		idx++
 		if idx >= len(ring.sortedHashes) {
 			idx = 0
