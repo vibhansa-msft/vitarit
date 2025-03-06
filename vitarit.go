@@ -55,3 +55,8 @@ func (v *Vitarit) Set(key string, value []byte) {
 func (v *Vitarit) Remove(key string) {
 	v.cache.remove(key)
 }
+
+// Get Peers
+func (v *Vitarit) GetPeers() []nodeInfo {
+	return v.cache.getPeers()
+}

@@ -90,6 +90,20 @@ func (cache *distributedCache) removeNode_unlocked(nodeID string) {
 }
 
 // -----------------------------------------------------------------------
+// List all the discovered peers
+func (cache *distributedCache) getPeers() []nodeInfo {
+	cache.mtx.RLock()
+	defer cache.mtx.RUnlock()
+
+	peers := make([]nodeInfo, 0)
+	for _, node := range cache.hashRing.nodes {
+		peers = append(peers, node.nodeInfo)
+	}
+
+	return peers
+}
+
+// -----------------------------------------------------------------------
 
 // createURL creates a URL for a key on a node
 func createURL(cnode *cacheNode, key string) string {

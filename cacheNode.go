@@ -147,7 +147,7 @@ func (cnode *cacheNode) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		copy, err := strconv.Atoi(r.URL.Query().Get("copy"))
 
 		if err != nil {
-			logMessage(LOG_DEBUG, cnode.ID+" received invalid set from "+id+" with copy factor "+string(copy))
+			logMessage(LOG_DEBUG, cnode.ID+" received invalid set from "+id+" with copy factor "+fmt.Sprintf("%d", copy))
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
@@ -160,7 +160,7 @@ func (cnode *cacheNode) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 
 		for key, value := range kv {
-			logMessage(LOG_DEBUG, cnode.ID+" received set key: "+key+" from "+id+" with copy factor "+string(copy))
+			logMessage(LOG_DEBUG, cnode.ID+" received set key: "+key+" from "+id+" with copy factor "+fmt.Sprintf("%d", copy))
 			cnode.set(key, copy, value)
 		}
 		w.WriteHeader(http.StatusOK)

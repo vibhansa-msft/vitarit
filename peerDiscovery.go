@@ -172,12 +172,12 @@ func (cache *distributedCache) receiveHeartbeats(myNodeID string, myGroupID stri
 				continue
 			}
 
-			if node.GroupID == myGroupID {
+			if node.GroupID != myGroupID {
 				// This node does not belong to your group so ignore the HB
 				continue
 			}
 
-			logMessage(LOG_DEBUG, "received heartbeat from "+node.ID+" IP: "+src.IP.String()+"Port: "+fmt.Sprint(src.Port))
+			logMessage(LOG_DEBUG, "received heartbeat from "+node.ID+" IP: "+src.IP.String()+" Port: "+fmt.Sprint(src.Port)+" GroupID: "+node.GroupID)
 
 			cache.addNode(node)
 		}

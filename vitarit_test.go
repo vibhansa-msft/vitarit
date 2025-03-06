@@ -2,15 +2,17 @@ package vitarit
 
 import (
 	"flag"
+	"fmt"
 	"os"
 	"testing"
 	"time"
 )
 
 var (
-	id   = flag.String("id", "node1", "ID of this node")
-	ip   = flag.String("ip", "127.0.0.1", "IP address of the server")
-	port = flag.String("port", "8081", "Port of the server")
+	id    = flag.String("id", "node1", "ID of this node")
+	ip    = flag.String("ip", "127.0.0.1", "IP address of the server")
+	port  = flag.String("port", "8081", "Port of the server")
+	group = flag.String("group", "X", "Group id of the cache group")
 )
 
 func TestMain(m *testing.M) {
@@ -25,7 +27,7 @@ func TestVitarit(t *testing.T) {
 
 	t.Logf("Selected IP : %s, Port %s, ID: %s", *ip, *port, *id)
 
-	vitarit := NewVitarit(*id, *ip, *port, "V")
+	vitarit := NewVitarit(*id, *ip, *port, *group)
 	defer vitarit.Stop()
 
 	vitarit.SetLogger(func(level int, message string) {
@@ -66,7 +68,7 @@ func TestPeerDiscovery(t *testing.T) {
 
 	t.Logf("Selected IP : %s, Port %s, ID: %s", *ip, *port, *id)
 
-	vitarit := NewVitarit(*id, *ip, *port, "V")
+	vitarit := NewVitarit(*id, *ip, *port, *group)
 	vitarit.SetLogger(func(level int, message string) {
 		t.Logf("Level: %d, Message: %s", level, message)
 	})
@@ -87,13 +89,13 @@ func TestKeyDistribution(t *testing.T) {
 		t.Logf("Level: %d, Message: %s", level, message)
 	}
 
-	vitarit1 := NewVitarit("node1", "127.0.0.1", "8081", "V")
+	vitarit1 := NewVitarit("node1", "127.0.0.1", "8081", *group)
 	vitarit1.SetLogger(loglocal)
 
-	vitarit2 := NewVitarit("node2", "127.0.0.1", "8082", "V")
+	vitarit2 := NewVitarit("node2", "127.0.0.1", "8082", *group)
 	vitarit2.SetLogger(loglocal)
 
-	vitarit3 := NewVitarit("node3", "127.0.0.1", "8083", "V")
+	vitarit3 := NewVitarit("node3", "127.0.0.1", "8083", *group)
 	vitarit3.SetLogger(loglocal)
 
 	vitarit1.Start(1)
@@ -132,4 +134,43 @@ func TestKeyDistribution(t *testing.T) {
 	} else {
 		t.Logf("key3 not found")
 	}
+}
+
+func TestPeerGrouping(t *testing.T) {
+	flag.Parse()
+
+	t.Logf("Selected IP : %s, Port %s, ID: %s", *ip, *port, *id)
+
+	loglocal := func(level int, message string) {
+		t.Logf("Level: %d, Message: %s", level, message)
+	}
+
+	vitarit1 := NewVitarit("node0", "127.0.0.1", "8081", "A")
+	vitarit1.SetLogger(loglocal)
+	vitarit1.Start(1)
+
+	for i := 1; i <= 3; i++ {
+		vitaritx := NewVitarit(fmt.Sprintf("node%d", i), "127.0.0.1", fmt.Sprintf("%d", 8082+i), "A")
+		vitaritx.SetLogger(loglocal)
+		vitaritx.Start(1)
+	}
+
+	vitarit2 := NewVitarit("node10", "127.0.0.1", "8091", "B")
+	vitarit2.SetLogger(loglocal)
+	vitarit2.Start(1)
+
+	for i := 1; i <= 5; i++ {
+		vitaritx := NewVitarit(fmt.Sprintf("node%d", 10+i), "127.0.0.1", fmt.Sprintf("%d", 8092+i), "B")
+		vitaritx.SetLogger(loglocal)
+		vitaritx.Start(1)
+	}
+
+	// Wait for http server of the node to start
+	time.Sleep(30 * time.Second)
+
+	peers := vitarit1.GetPeers()
+	t.Logf("Peers of vitarit1: %v", peers)
+
+	peers = vitarit2.GetPeers()
+	t.Logf("Peers of vitarit3: %v", peers)
 }
